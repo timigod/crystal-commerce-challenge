@@ -9,7 +9,7 @@ class Customer
   validates_format_of :email, with: /\A[^@]+@([^@\.]+\.)+[^@\.]+\z/
 
 
-  def self.sideload
+  def self.alternate_sideload
     set_associations
     return serialized_sideload_hash
   end
@@ -21,12 +21,16 @@ class Customer
     @@cities = []; @@states = []
     @@addresses.each { |x| @@cities << x.city }
     @@cities.each { |x| @@states << x.state }
+
+    @@addresses.uniq!
+    @@cities.uniq!
+    @@states.uniq!
   end
 
 
   def self.serialized_sideload_hash
     {
-        customers: sideload_serialize(Customer.all, SideloadCustomerSerializer),
+        customers: sideload_serialize(Customer.all, AlternateSideloadCustomerSerializer),
         associations: {
             addresses: sideload_serialize(@@addresses, SideloadAddressSerializer),
             cities: sideload_serialize(@@cities, SideloadCitySerializer),
@@ -37,7 +41,10 @@ class Customer
   end
 
   def self.sideload_serialize(collection, serializer)
-    return ActiveModelSerializers::SerializableResource.new(collection, each_serializer: serializer)
+    return ActiveModel::ArraySerializer.new(
+        collection,
+        each_serializer: serializer
+    )
   end
 
 end
