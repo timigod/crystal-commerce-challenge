@@ -27,9 +27,11 @@ class Customer
   def self.serialized_sideload_hash
     {
         customers: sideload_serialize(Customer.all, SideloadCustomerSerializer),
-        addresses: sideload_serialize(@@addresses, SideloadAddressSerializer),
-        cities: sideload_serialize(@@cities, SideloadCitySerializer),
-        states: sideload_serialize(@@states, SideloadStateSerializer)
+        associations: {
+            addresses: sideload_serialize(@@addresses, SideloadAddressSerializer),
+            cities: sideload_serialize(@@cities, SideloadCitySerializer),
+            states: sideload_serialize(@@states, SideloadStateSerializer)
+        }
 
     }
   end
